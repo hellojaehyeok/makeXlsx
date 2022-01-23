@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+
+<body>
+
+    <button type="button" onclick="onClickXlsx()" >엑셀파일 다운로드</button>
+    <button type="button" onclick="exportExcel()" >엑셀파일 다운로드 sheetjs</button>
+    <div style="display: all;" id="tableWrap">
+        <table cellSpacing=0 id="tableData" style="border-collapse: collapse;">
+            <tbody>
+                <tr style="border-bottom: 2px solid #000;" ><td>2022년 01월 23일</td></tr>
+                <tr><td>  </td></tr>
+                <tr style="border-bottom: 1px solid #000;"><td>* 이름 : </td>          <td>송재혁</td></tr>
+                <tr><td>  </td></tr>
+                <tr style="border-bottom: 1px solid #000;"><td>* 직업</td>             <td>프론트엔드 개발</td></tr>
+                <tr><td>  </td></tr>
+                <tr style="border-bottom: 1px solid #000;"><td>* 기술 스택</td></tr>
+                <tr><td>  </td></tr>
+                <tr>
+                    <td style="border:1px solid #000">HTML</td>
+                    <td style="border:1px solid #000">CSS</td>
+                    <td style="border:1px solid #000">Javascript</td>
+                    <td style="border:1px solid #000">React</td>
+                    <td style="border:1px solid #000">React Native</td>
+                    <td style="border:1px solid #000">React Redux</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sheet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+    <!--FileSaver savaAs 이용 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
+
+
+    <script src="./vendor/tableExport.js"></script>
+    <script>
+        // no sheetjs --- 
+        function onClickXlsx(){
+            // sheetjs사용 x
+            var a = document.createElement('a');
+            a.href = 'data:application/octet-stream,' + encodeURIComponent(document.querySelector("#tableWrap").innerHTML);
+            a.download = "common.xls";
+            a.click();
+        }
+
+        // sheetjs --- 
+        var excelHandler = {
+            getExcelFileName : function(){
+                return 'research_note.xlsx';	//파일명
+            },
+            getSheetName : function(){
+                return '연구노트';	//시트명
+            },
+            getExcelData : function(){
+                return document.getElementById('tableData'); 	//TABLE id
+            },
+            getWorksheet : function(){
+                return XLSX.utils.table_to_sheet(this.getExcelData());
+            }
+        }
+        function exportExcel(){ 
+            // step 1. workbook 생성
+            var wb = XLSX.utils.book_new();
+
+            // step 2. 시트 만들기 
+            var newWorksheet = excelHandler.getWorksheet();
+
+            // step 3. workbook에 새로만든 워크시트에 이름을 주고 붙인다.  
+            XLSX.utils.book_append_sheet(wb, newWorksheet, excelHandler.getSheetName());
+
+            // step 4. 엑셀 파일 만들기 
+            var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
+
+            // step 5. 엑셀 파일 내보내기 
+            // const xlsxFile = new File([s2ab(wbout)],"research_note.xlsx",{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), excelHandler.getExcelFileName());
+        }
+        function s2ab(s) { 
+            var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+            var view = new Uint8Array(buf);  //create uint8array as viewer
+            for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+            return buf;    
+        }
+
+
+    </script>
+
+</body>
+
+
+</html>
